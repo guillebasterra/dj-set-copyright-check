@@ -1,4 +1,4 @@
-# dj-set-check
+# DJ Set Copyright Check
 
 Check a Rekordbox playlist against YouTube's Content ID before recording a DJ set.
 
