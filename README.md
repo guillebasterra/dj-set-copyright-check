@@ -32,6 +32,10 @@ Upload the video to YouTube Studio as **Private**. When processing finishes, ope
 
 Options: `--image cover.jpg` uses your own still image instead of black, `--audio-bitrate 192k` changes the audio quality, and `--timestamps-only` skips the video. Artist and title come from each file's tags; when a file has none, the playlist's own label is used instead.
 
+## With Claude Code
+
+The repo includes a [Claude Code](https://claude.com/claude-code) skill in `.claude/skills/check-set/`. Open the repo in Claude Code and ask it to check a playlist. It builds the video, has you upload it (or uses `--upload`), then reads the claims in YouTube Studio through [Claude in Chrome](https://claude.ai/chrome). It ends with a per-track report: which tracks to swap out, which are blocked in some countries, which are only monetized, and which aren't claimed.
+
 ## Set up uploads (optional)
 
 `check-set playlist.m3u8 --upload` builds the video and then uploads it to your channel as Private, with the timestamp list in the description. Uploading needs your own Google Cloud OAuth client. Setting it up takes about ten minutes and only has to be done once:
