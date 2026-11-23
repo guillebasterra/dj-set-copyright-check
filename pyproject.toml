@@ -5,6 +5,8 @@ description = "Check a Rekordbox playlist against YouTube's Content ID before re
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "google-api-python-client>=2.202.0",
+    "google-auth-oauthlib>=1.5.0",
     "mutagen>=1.47",
 ]
 

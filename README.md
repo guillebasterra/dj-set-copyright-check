@@ -2,7 +2,7 @@
 
 Check a Rekordbox playlist against YouTube's Content ID before recording a DJ set.
 
-**Status:** building the test video and timestamp list works. Uploading to YouTube is next; for now, upload the video by hand. See [PLAN.md](PLAN.md).
+**Status:** building the test video and timestamp list works. Uploading through the API (`--upload`) is written but not yet tested against a real channel. See [PLAN.md](PLAN.md).
 
 ## Install
 
@@ -31,6 +31,28 @@ This writes two files next to the playlist (or into `-o DIR`):
 Upload the video to YouTube Studio as **Private**. When processing finishes, open the video's **Copyright** details to see which tracks were claimed and what each claim does.
 
 Options: `--image cover.jpg` uses your own still image instead of black, `--audio-bitrate 192k` changes the audio quality, and `--timestamps-only` skips the video. Artist and title come from each file's tags; when a file has none, the playlist's own label is used instead.
+
+## Set up uploads (optional)
+
+`check-set playlist.m3u8 --upload` builds the video and then uploads it to your channel as Private, with the timestamp list in the description. Uploading needs your own Google Cloud OAuth client. Setting it up takes about ten minutes and only has to be done once:
+
+1. In the [Google Cloud console](https://console.cloud.google.com/), create a project.
+2. Under **APIs & Services → Library**, find **YouTube Data API v3** and enable it.
+3. Under **Google Auth Platform** (formerly the OAuth consent screen), set the app up as **External**, then add the Google account that owns your channel under **Audience → Test users**.
+4. Under **Clients** (or **Credentials → Create credentials → OAuth client ID**), create a **Desktop app** client and download its JSON file.
+5. Save the file as `~/.config/check-set/client_secret.json`, or pass its path with `--client-secret`.
+
+The first `--upload` opens your browser so you can sign in. If your channel is a Brand Account, pick the channel there, not your personal account. The sign-in is saved in `~/.config/check-set/token.json`, and the tool only asks for permission to upload.
+
+Things to know:
+
+- **Uploads stay Private.** YouTube forces videos uploaded through an unverified API project to Private, which is what you want here anyway.
+- **Quota.** The default API quota is 10,000 units a day and one upload costs about 1,600, so you get roughly six uploads a day.
+- **Weekly re-sign-in.** While the Google app is in "Testing" mode, the saved sign-in expires after 7 days. The tool asks you to sign in again when that happens.
+
+Set `CHECK_SET_CONFIG` to keep these files somewhere other than `~/.config/check-set`.
+
+## Tests
 
 Run the tests with `uv run pytest`. They generate their own tone files, so you don't need any music to run them.
 

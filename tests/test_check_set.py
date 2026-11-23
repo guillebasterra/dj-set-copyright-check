@@ -103,3 +103,15 @@ def test_end_to_end(tmp_path):
     info = json.loads(probe.stdout)
     assert sorted(s["codec_type"] for s in info["streams"]) == ["audio", "video"]
     assert float(info["format"]["duration"]) == pytest.approx(9, abs=0.5)
+
+
+def test_long_descriptions_are_cut_at_a_line():
+    from check_set.upload import DESCRIPTION_LIMIT, fit_description
+
+    short = "0:00 A - One\n"
+    assert fit_description(short) == short
+    long = "".join(f"{i}:00 Artist {i} - Título {i}\n" for i in range(400))
+    cut = fit_description(long)
+    assert len(cut.encode("utf-8")) <= DESCRIPTION_LIMIT
+    assert cut.splitlines()[-2] in long.splitlines()
+    assert "cut short" in cut.splitlines()[-1]
