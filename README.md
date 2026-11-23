@@ -2,7 +2,37 @@
 
 Check a Rekordbox playlist against YouTube's Content ID before recording a DJ set.
 
-**Status:** planning only, nothing is built yet. See [PLAN.md](PLAN.md).
+**Status:** building the test video and timestamp list works. Uploading to YouTube is next; for now, upload the video by hand. See [PLAN.md](PLAN.md).
+
+## Install
+
+You need [ffmpeg](https://ffmpeg.org/) and [uv](https://docs.astral.sh/uv/).
+
+```
+brew install ffmpeg uv          # macOS; on Debian/Ubuntu: apt install ffmpeg, then install uv
+git clone https://github.com/guillebasterra/dj-set-copyright-check.git
+cd dj-set-copyright-check
+uv sync
+```
+
+## Use
+
+In Rekordbox, right-click the playlist and choose **Export a playlist to a file → M3U8**. Keep the drive with the music plugged in. Then run:
+
+```
+uv run check-set path/to/playlist.m3u8
+```
+
+This writes two files next to the playlist (or into `-o DIR`):
+
+- `playlist.mp4`: every track joined end to end over a black frame at 1 fps. A 4.5-hour set comes out at about 250 MB and takes a few minutes to build.
+- `playlist.timestamps.txt`: one `H:MM:SS Artist - Title` line per track. Paste it into the video description so each claim's time maps to a track.
+
+Upload the video to YouTube Studio as **Private**. When processing finishes, open the video's **Copyright** details to see which tracks were claimed and what each claim does.
+
+Options: `--image cover.jpg` uses your own still image instead of black, `--audio-bitrate 192k` changes the audio quality, and `--timestamps-only` skips the video. Artist and title come from each file's tags; when a file has none, the playlist's own label is used instead.
+
+Run the tests with `uv run pytest`. They generate their own tone files, so you don't need any music to run them.
 
 ## The problem
 

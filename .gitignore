@@ -5,3 +5,9 @@ token*.json
 *.mp3
 __pycache__/
 .venv/
+out/
+*.timestamps.txt
+# Your own playlists stay local; the repo is public.
+/*.m3u
+/*.m3u8
+.pytest_cache/
