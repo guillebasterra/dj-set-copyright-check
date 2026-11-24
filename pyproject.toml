@@ -3,6 +3,7 @@ name = "dj-set-copyright-check"
 version = "0.1.0"
 description = "Check a Rekordbox playlist against YouTube's Content ID before recording a DJ set."
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.10"
 dependencies = [
     "google-api-python-client>=2.202.0",

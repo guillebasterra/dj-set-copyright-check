@@ -2,25 +2,51 @@
 
 Check a Rekordbox playlist against YouTube's Content ID before recording a DJ set.
 
-**Status:** building the test video and timestamp list works. Uploading through the API (`--upload`) is written but not yet tested against a real channel. See [PLAN.md](PLAN.md).
+**Status:** works. Building the video and reading the claims by hand are tested on a real 4-hour set. Uploading through the API (`--upload`) is written but not yet tested against a real channel. See [PLAN.md](PLAN.md).
 
 ## Install
 
-You need [ffmpeg](https://ffmpeg.org/) and [uv](https://docs.astral.sh/uv/).
+You need [ffmpeg](https://ffmpeg.org/) and [uv](https://docs.astral.sh/uv/):
 
 ```
 brew install ffmpeg uv          # macOS; on Debian/Ubuntu: apt install ffmpeg, then install uv
-git clone https://github.com/guillebasterra/dj-set-copyright-check.git
-cd dj-set-copyright-check
-uv sync
 ```
+
+### With Claude Code (easiest)
+
+In [Claude Code](https://claude.com/claude-code), run:
+
+```
+/plugin install check-set --marketplace guillebasterra/dj-set-copyright-check
+```
+
+On Claude Code versions older than 2.1.275, run `/plugin marketplace add guillebasterra/dj-set-copyright-check` and then `/plugin install check-set@dj-set-copyright-check`. Also install [Claude in Chrome](https://claude.ai/chrome) and sign in to YouTube Studio in Chrome.
+
+### Command line only
+
+```
+uv tool install git+https://github.com/guillebasterra/dj-set-copyright-check
+```
+
+This puts `check-set` on your PATH. Update it with `uv tool upgrade dj-set-copyright-check`.
 
 ## Use
 
-In Rekordbox, right-click the playlist and choose **Export a playlist to a file → M3U8**. Keep the drive with the music plugged in. Then run:
+In Rekordbox, right-click the playlist and choose **Export a playlist to a file → M3U8**. Keep the drive with the music plugged in.
+
+### With Claude Code
+
+Ask Claude Code something like "check ~/Desktop/myset.m3u8 for copyright claims", or type `/` and pick the check-set skill. Claude:
+
+1. Builds the video and installs the `check-set` command if it's missing.
+2. Has you drag the video into YouTube Studio as Private, or uses `--upload` if you've set it up.
+3. Reads the claims in Studio through Claude in Chrome. This is read only: it never disputes, trims or deletes anything.
+4. Writes a per-track report: which tracks to swap out, which are blocked in some countries, which are only monetized, and which aren't claimed.
+
+### Command line
 
 ```
-uv run check-set path/to/playlist.m3u8
+check-set path/to/playlist.m3u8
 ```
 
 This writes two files next to the playlist (or into `-o DIR`):
@@ -30,11 +56,13 @@ This writes two files next to the playlist (or into `-o DIR`):
 
 Upload the video to YouTube Studio as **Private**. When processing finishes, open the video's **Copyright** details to see which tracks were claimed and what each claim does.
 
-Options: `--image cover.jpg` uses your own still image instead of black, `--audio-bitrate 192k` changes the audio quality, and `--timestamps-only` skips the video. Artist and title come from each file's tags; when a file has none, the playlist's own label is used instead.
+Options:
+- `--image cover.jpg` uses your own still image instead of black.
+- `--audio-bitrate 192k` changes the audio quality.
+- `--timestamps-only` skips the video.
+- `--no-rebuild` reuses a video from an earlier run.
 
-## With Claude Code
-
-The repo includes a [Claude Code](https://claude.com/claude-code) skill in `.claude/skills/check-set/`. Open the repo in Claude Code and ask it to check a playlist. It builds the video, has you upload it (or uses `--upload`), then reads the claims in YouTube Studio through [Claude in Chrome](https://claude.ai/chrome). It ends with a per-track report: which tracks to swap out, which are blocked in some countries, which are only monetized, and which aren't claimed.
+Artist and title come from each file's tags. When a file has none, the playlist's own label is used instead.
 
 ## Set up uploads (optional)
 
@@ -56,9 +84,18 @@ Things to know:
 
 Set `CHECK_SET_CONFIG` to keep these files somewhere other than `~/.config/check-set`.
 
-## Tests
+## Development
 
-Run the tests with `uv run pytest`. They generate their own tone files, so you don't need any music to run them.
+```
+git clone https://github.com/guillebasterra/dj-set-copyright-check.git
+cd dj-set-copyright-check
+uv sync
+uv run pytest
+```
+
+Inside the clone, the skill also loads straight from `.claude/skills/` (a symlink to `skills/`), and `uv run check-set` runs your working copy. To check the plugin files, run `claude plugin validate .`.
+
+The tests generate their own tone files, so you don't need any music to run them.
 
 ## The problem
 
@@ -89,3 +126,7 @@ Let YouTube do the check, before the set is recorded:
 - The real mix may match slightly differently from the raw tracks.
 - Live streams are policed more strictly than uploads; this is for recorded sets.
 - A claim is not a copyright strike. Strikes come from manual takedowns and can't be predicted.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

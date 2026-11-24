@@ -1,0 +1,12 @@
+{
+  "name": "check-set",
+  "version": "0.1.0",
+  "description": "Check a DJ playlist against YouTube's Content ID before recording a set: builds a test video, reads the claims in YouTube Studio, and reports per track.",
+  "author": {
+    "name": "Guillermo Basterra"
+  },
+  "homepage": "https://github.com/guillebasterra/dj-set-copyright-check",
+  "repository": "https://github.com/guillebasterra/dj-set-copyright-check",
+  "license": "MIT",
+  "keywords": ["dj", "youtube", "content-id", "copyright", "rekordbox"]
+}

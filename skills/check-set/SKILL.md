@@ -7,15 +7,24 @@ description: Check a DJ playlist (Rekordbox m3u/m3u8 export) against YouTube's C
 
 The idea: YouTube is the only thing that knows each label's Content ID policy. So join the playlist's tracks into one video, upload it as Private, and let YouTube say which tracks it claims and what each claim does. The timestamp list maps each claim back to a track.
 
-Work from the repo root. Run `uv sync` once if `.venv` is missing.
+## 0. Make sure the tools are installed
+
+Check with `command -v check-set ffmpeg`.
+
+- If `ffmpeg` is missing, ask the user to install it (macOS: `brew install ffmpeg`, Debian/Ubuntu: `sudo apt install ffmpeg`).
+- If `check-set` is missing, it needs [uv](https://docs.astral.sh/uv/). Ask before installing:
+  ```
+  uv tool install git+https://github.com/guillebasterra/dj-set-copyright-check
+  ```
+- If the user is working inside a clone of this repo, `uv run check-set` works too.
 
 ## 1. Build the video and timestamps
 
 ```
-uv run check-set <playlist.m3u8> -o out
+check-set <playlist.m3u8>
 ```
 
-- This writes `out/<name>.mp4` and `out/<name>.timestamps.txt`. A 4-hour set takes a few minutes, so run it in the background.
+- This writes `<name>.mp4` and `<name>.timestamps.txt` next to the playlist; pass `-o DIR` to put them somewhere else. The command prints both paths, and the steps below use those files. A 4-hour set takes a few minutes, so run it in the background.
 - If the video already exists from an earlier run and the playlist hasn't changed, add `--no-rebuild`.
 - "tracks not found" usually means the drive with the music isn't plugged in. Tell the user which files are missing; don't edit the playlist.
 
@@ -23,7 +32,7 @@ uv run check-set <playlist.m3u8> -o out
 
 Uploading publishes to the user's channel, so ask before doing it, even though the video is Private.
 
-- **API (when it's set up):** if `~/.config/check-set/client_secret.json` exists, run `uv run check-set <playlist> -o out --no-rebuild --upload`. If there's no `token.json` next to it yet, the first run opens a browser sign-in. Have the user run that one themselves with `! <command>`. The output ends with the video's Studio copyright URL.
+- **API (when it's set up):** if `~/.config/check-set/client_secret.json` exists, run `check-set <playlist> --no-rebuild --upload` (same `-o` as step 1, if any). If there's no `token.json` next to it yet, the first run opens a browser sign-in. Have the user run that one themselves with `! <command>`. The output ends with the video's Studio copyright URL.
 - **By hand (otherwise):** ask the user to upload the mp4:
   1. In studio.youtube.com, choose Create → Upload videos and drop in the mp4.
   2. Set visibility to **Private**.
@@ -56,13 +65,13 @@ If the user isn't signed in to Studio, or the extension isn't connected, stop an
 
 ## 5. Match claims to tracks
 
-Each line of `out/<name>.timestamps.txt` is `H:MM:SS Artist - Title`. A track runs from its own start time to the next line's start time, and the last track runs to the end of the video.
+Each line of `<name>.timestamps.txt` is `H:MM:SS Artist - Title`. A track runs from its own start time to the next line's start time, and the last track runs to the end of the video.
 
 Assign each claim to the track whose range contains most of the claim's time range. If a claim spans two tracks, or YouTube matched a song that differs from the track's name, list it and say which one you picked. Samples, remixes and edits often match the original song. Expect up to a couple of seconds of drift over a long set; that doesn't matter at this scale.
 
 ## 6. Report
 
-Write `out/<name>.claims.md` and give the user the short version in chat:
+Write `<name>.claims.md`, next to the other two files, and give the user the short version in chat:
 
 - **Swap out:** tracks blocked worldwide. Any one of these takes the whole video down.
 - **Think about it:** tracks blocked in some countries (list the countries).

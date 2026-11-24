@@ -1,0 +1,14 @@
+{
+  "name": "dj-set-copyright-check",
+  "description": "Claude Code plugin for checking DJ playlists against YouTube Content ID.",
+  "owner": {
+    "name": "Guillermo Basterra"
+  },
+  "plugins": [
+    {
+      "name": "check-set",
+      "source": "./",
+      "description": "Check a DJ playlist against YouTube's Content ID before recording a set."
+    }
+  ]
+}
